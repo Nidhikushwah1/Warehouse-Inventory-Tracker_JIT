@@ -7,21 +7,39 @@ public class Main {
         
         AlertService alertService = new StockAlertSystem();
 
+        WarehouseManager manager = new WarehouseManager();
         
-        Warehouse warehouse = new Warehouse(alertService);
+        Warehouse delhi = new Warehouse("Delhi", alertService);
+        Warehouse mumbai = new Warehouse("Mumbai", alertService);
+         
+        manager.addWarehouse(delhi);
+        manager.addWarehouse(mumbai);
+
+        
+        
 
         
         Product laptop = new Product(1, "Laptop", 0, 5);
-        warehouse.addProduct(laptop);
+        Product phone = new Product(2, "Phone", 3, 2);
+        delhi.addProduct(laptop);
+        mumbai.addProduct(phone);
 
        
-        warehouse.receiveShipment(1, 10); 
+        delhi.receiveShipment(1, 10);
+        delhi.fulfillOrder(1, 6); 
+
+       
+        mumbai.receiveShipment(2, 5);
+        mumbai.fulfillOrder(2, 7); 
 
         
-        warehouse.fulfillOrder(1, 6); 
+        delhi.showAllProducts();
+        mumbai.showAllProducts();
 
+        
      
-        warehouse.showAllProducts();
+       
+        manager.showAllWarehouses();
     }
 }
 

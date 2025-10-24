@@ -1,4 +1,5 @@
 warehouseinventorytracker\StockAlertSystem.class
+warehouseinventorytracker\WarehouseManager.class
 warehouseinventorytracker\Main.class
 warehouseinventorytracker\Product.class
 warehouseinventorytracker\AlertService.class
