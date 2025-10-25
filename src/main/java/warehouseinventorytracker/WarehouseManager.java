@@ -3,15 +3,25 @@ package warehouseinventorytracker;
 
 import java.util.HashMap;
 
-public class WarehouseManager {
-    private HashMap<String, Warehouse> warehouses;
 
-    public WarehouseManager() {
-        this.warehouses = new HashMap<>();
+
+import java.util.*;
+
+public class WarehouseManager {
+    private Map<String, Warehouse> warehouses = new HashMap<>();
+    private AlertService alertService;
+
+    public WarehouseManager(AlertService alertService) {
+        this.alertService = alertService;
     }
 
-    public void addWarehouse(Warehouse warehouse) {
-        warehouses.put(warehouse.getName(), warehouse);
+    public void addWarehouse(String name) {
+        if (!warehouses.containsKey(name)) {
+            warehouses.put(name, new Warehouse(name, alertService));
+            System.out.println(" Warehouse added: " + name);
+        } else {
+            System.out.println("️ Warehouse already exists!");
+        }
     }
 
     public Warehouse getWarehouse(String name) {
@@ -21,7 +31,16 @@ public class WarehouseManager {
     public void showAllWarehouses() {
         System.out.println("\n All Warehouses:");
         for (String name : warehouses.keySet()) {
-            System.out.println("- " + name);
+            System.out.println("➡️ " + name);
         }
     }
+
+    public Map<String, List<Product>> getDataMap() {
+        Map<String, List<Product>> map = new HashMap<>();
+        for (String name : warehouses.keySet()) {
+            map.put(name, warehouses.get(name).getProducts());
+        }
+        return map;
+    }
 }
+

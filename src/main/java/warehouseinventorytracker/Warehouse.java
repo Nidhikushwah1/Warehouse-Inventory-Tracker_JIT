@@ -4,75 +4,66 @@ package warehouseinventorytracker;
 
 import java.util.HashMap;
 
+
+
+import java.util.*;
+
 public class Warehouse {
     private String name;
-    private HashMap<Integer, Product> inventory;
-    private transient AlertService alertService;
- 
+    private Map<Integer, Product> inventory = new HashMap<>();
+    private AlertService alertService;
 
-    public Warehouse( String name ,AlertService alertService) {
-        this.name= name;
-        this.inventory = new HashMap<>();
+    public Warehouse(String name, AlertService alertService) {
+        this.name = name;
         this.alertService = alertService;
     }
 
-    public String getName(){
+    public String getName() {
         return name;
     }
-    public void addProduct(Product product) {
+
+    public synchronized void addProduct(Product product) {
         if (inventory.containsKey(product.getId())) {
-            System.out.println(" Product already exists in " + name + " warehouse!");
+            System.out.println(" Product with ID " + product.getId() + " already exists!");
         } else {
             inventory.put(product.getId(), product);
-            System.out.println(" Product added: " + name + " warehouse: " + product.getName()) ;
-    }
-        System.out.println("=====================================================");
+            System.out.println(" Product added to " + name + ": " + product.getName());
+        }
     }
 
-    
-    public void receiveShipment(int productId, int quantity) {
-        Product p = inventory.get(productId);
+    public synchronized void receiveShipment(int id, int quantity) {
+        Product p = inventory.get(id);
         if (p != null) {
             p.setQuantity(p.getQuantity() + quantity);
-              System.out.println("Shipment received (" + name + "): +" + quantity + " → Total = " + p.getQuantity());
-             
+            System.out.println(" Shipment received: " + quantity + " units of " + p.getName());
         } else {
-            System.out.println("Invalid product ID in " + name + " warehouse!");
+            System.out.println(" Product ID not found!");
         }
-        System.out.println("================================================");
-    }
- 
-    
-    public void fulfillOrder(int productId, int quantity) {
-        Product p = inventory.get(productId);
-        if (p == null) {
-             System.out.println(" Invalid product ID in " + name + "warehouse!");
-            return;
-        }
-
-        if (p.getQuantity() < quantity) {
-            System.out.println(" Not enough stock to fulfill the order for " + p.getName());
-            return;
-        }
-
-        p.setQuantity(p.getQuantity() - quantity);
-        System.out.println("Order fulfilled(" + name + "): -"+ quantity + " removed → Remaining = " + p.getQuantity());
-
-        
-        if (p.getQuantity() < p.getReorderThreshold()) {
-            alertService.onLowStock(p,name);
-        }
-        System.out.println("============================================================");
     }
 
-   
+    public synchronized void fulfillOrder(int id, int quantity) {
+        Product p = inventory.get(id);
+        if (p != null) {
+            if (p.getQuantity() >= quantity) {
+                p.setQuantity(p.getQuantity() - quantity);
+                System.out.println(" Order fulfilled: " + quantity + " units of " + p.getName());
+                if (p.getQuantity() < p.getThreshold()) {
+                    alertService.onLowStock(p, name);
+                }
+            } else {
+                System.out.println(" Insufficient stock for " + p.getName());
+            }
+        } else {
+            System.out.println(" Product ID not found!");
+        }
+    }
+
+    public List<Product> getProducts() {
+        return new ArrayList<>(inventory.values());
+    }
+
     public void showAllProducts() {
-        System.out.println("\n Current Inventory" + name + " warehouse:");
-        for (Product p : inventory.values()) {
-            System.out.println(p);
-        }
+        System.out.println("\n Inventory (" + name + "):");
+        inventory.values().forEach(System.out::println);
     }
-}  
-   
-
-
+}
