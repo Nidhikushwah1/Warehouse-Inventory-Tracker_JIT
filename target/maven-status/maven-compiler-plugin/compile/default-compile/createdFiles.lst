@@ -1,7 +1,9 @@
 warehouseinventorytracker\WarehouseManager.class
+warehouseinventorytracker\data.class
 warehouseinventorytracker\AlertService.class
 warehouseinventorytracker\Warehouse.class
 warehouseinventorytracker\StockAlertSystem.class
+warehouseinventorytracker\WarehouseTask.class
 warehouseinventorytracker\Main.class
 warehouseinventorytracker\Product.class
 warehouseinventorytracker\FileHandler.class

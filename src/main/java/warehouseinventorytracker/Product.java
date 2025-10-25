@@ -1,11 +1,10 @@
-
 package warehouseinventorytracker;
 
-  public class Product {
-    private int id;
-    private String name;
+public class Product {
+    private final int id;
+    private final String name;
     private int quantity;
-    private int threshold;
+    private final int threshold;
 
     public Product(int id, String name, int quantity, int threshold) {
         this.id = id;
@@ -16,16 +15,25 @@ package warehouseinventorytracker;
 
     public int getId() { return id; }
     public String getName() { return name; }
-    public int getQuantity() { return quantity; }
+
+    public synchronized int getQuantity() { return quantity; }
     public int getThreshold() { return threshold; }
 
-    public void setQuantity(int quantity) { this.quantity = quantity; }
+    public synchronized void increase(int amount) {
+        if (amount > 0) quantity += amount;
+    }
+
+    public synchronized boolean decrease(int amount) {
+        if (amount <= 0) return false;
+        if (quantity >= amount) {
+            quantity -= amount;
+            return true;
+        }
+        return false;
+    }
 
     @Override
     public String toString() {
-        return "Product ID: " + id +
-               ", Name: " + name +
-               ", Quantity: " + quantity +
-               ", Threshold: " + threshold;
+        return id + "," + name + "," + quantity + "," + threshold;
     }
 }

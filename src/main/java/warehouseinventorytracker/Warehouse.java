@@ -1,69 +1,55 @@
-
 package warehouseinventorytracker;
-
-
-import java.util.HashMap;
-
-
 
 import java.util.*;
 
 public class Warehouse {
-    private String name;
-    private Map<Integer, Product> inventory = new HashMap<>();
-    private AlertService alertService;
+    private final String name;
+    private final Map<Integer, Product> inventory = new HashMap<>();
+    private final AlertService alertService;
 
     public Warehouse(String name, AlertService alertService) {
         this.name = name;
         this.alertService = alertService;
     }
 
-    public String getName() {
-        return name;
-    }
+    public String getName() { return name; }
 
     public synchronized void addProduct(Product product) {
         if (inventory.containsKey(product.getId())) {
-            System.out.println(" Product with ID " + product.getId() + " already exists!");
+            System.out.println("❌ Product ID exists: " + product.getId());
         } else {
             inventory.put(product.getId(), product);
-            System.out.println(" Product added to " + name + ": " + product.getName());
+            System.out.println("✅ Product added: " + product.getName());
         }
     }
 
-    public synchronized void receiveShipment(int id, int quantity) {
+    public synchronized void receiveShipment(int id, int qty) {
         Product p = inventory.get(id);
         if (p != null) {
-            p.setQuantity(p.getQuantity() + quantity);
-            System.out.println(" Shipment received: " + quantity + " units of " + p.getName());
-        } else {
-            System.out.println(" Product ID not found!");
-        }
+            p.increase(qty);
+            System.out.println("📦 Shipment received: " + qty + " units of " + p.getName());
+        } else System.out.println("❌ Product ID not found!");
     }
 
-    public synchronized void fulfillOrder(int id, int quantity) {
+    public synchronized void fulfillOrder(int id, int qty) {
         Product p = inventory.get(id);
         if (p != null) {
-            if (p.getQuantity() >= quantity) {
-                p.setQuantity(p.getQuantity() - quantity);
-                System.out.println(" Order fulfilled: " + quantity + " units of " + p.getName());
-                if (p.getQuantity() < p.getThreshold()) {
-                    alertService.onLowStock(p, name);
-                }
+            if (p.decrease(qty)) {
+                System.out.println("🛒 Order fulfilled: " + qty + " units of " + p.getName());
+                if (p.getQuantity() < p.getThreshold()) alertService.onLowStock(p, name);
             } else {
-                System.out.println(" Insufficient stock for " + p.getName());
+                System.out.println("❌ Insufficient stock for " + p.getName());
             }
-        } else {
-            System.out.println(" Product ID not found!");
-        }
+        } else System.out.println("❌ Product ID not found!");
     }
 
-    public List<Product> getProducts() {
+    public synchronized List<Product> getProducts() {
         return new ArrayList<>(inventory.values());
     }
 
-    public void showAllProducts() {
-        System.out.println("\n Inventory (" + name + "):");
-        inventory.values().forEach(System.out::println);
+    public synchronized void showAllProducts() {
+        System.out.println("\nInventory (" + name + "):");
+        if (inventory.isEmpty()) System.out.println("(empty)");
+        else inventory.values().forEach(p -> System.out.println("ID:" + p.getId() + " | " + p.getName() + " | Qty:" + p.getQuantity() + " | Th:" + p.getThreshold()));
     }
 }
